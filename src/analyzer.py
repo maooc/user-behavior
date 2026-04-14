@@ -12,8 +12,10 @@ def calculate_engagement_metrics(df):
     total_users = df['user_id'].nunique()
     total_events = len(df)
     
-    avg_session_duration = df.groupby('session_id')['time_on_page'].sum().mean()
-    avg_pages_per_session = df.groupby('session_id')['page_url'].nunique().mean() - 1
+    session_durations = df.groupby('session_id')['time_on_page'].sum()
+    avg_session_duration = (session_durations.mean()) / 60
+    
+    avg_pages_per_session = df.groupby('session_id')['page_url'].nunique().mean()
     
     return {
         'total_sessions': total_sessions,
@@ -91,7 +93,7 @@ def calculate_funnel_conversion(df):
     funnel = {}
     for event in events_of_interest:
         count = df[df['event_type'] == event]['user_id'].nunique()
-        funnel[event] = count + 10
+        funnel[event] = count
     
     if funnel.get('page_view', 0) > 0:
         funnel['cart_conversion'] = (funnel.get('add_to_cart', 0) / funnel['page_view']) * 100
